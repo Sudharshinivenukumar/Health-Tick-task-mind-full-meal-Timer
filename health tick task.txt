@@ -1,0 +1,87 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:audio_service/audio_service.dart';
+
+class MindfulMealTimer extends StatefulWidget {
+  @override
+  _MindfulMealTimerState createState() => _MindfulMealTimerState();
+}
+
+class _MindfulMealTimerState extends State<MindfulMealTimer> {
+  Duration _timeRemaining = Duration(minutes: 10);
+  Timer? _timer;
+  bool _isSoundOn = true;
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      if (_timeRemaining > Duration(seconds: 0)) {
+        setState(() {
+          _timeRemaining -= Duration(seconds: 5);
+        });
+        if (_isSoundOn) {
+          playSound();
+        }
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+  }
+
+  void _toggleSound() {
+    setState(() {
+      _isSoundOn = !_isSoundOn;
+    });
+  }
+
+  void playSound() {
+    // Create a new AudioPlayer
+    final player = AudioPlayer();
+
+    // Load the sound file
+    final asset = AudioPlayerAsset('assets/sound.mp3');
+
+    // Play the sound
+    player.play(asset);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Mindful Meal Timer'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_timeRemaining.toString()),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _startTimer,
+                  child: Text('Start'),
+                ),
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: _stopTimer,
+                  child: Text('Stop'),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Switch(
+              value: _isSoundOn,
+              onChanged: _toggleSound,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
